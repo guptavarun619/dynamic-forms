@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  username String
+  password String
+  forms Form[]
+  responses Response[]
+}
+
+model Form {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  user User @relation(fields: [userId], references: [id])
+  userId String @db.ObjectId
+  title String
+  description String
+  creation_date DateTime
+  formFields FormField[]
+  responses Response[]
+}
+
+model FormField{
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  form Form @relation(fields: [formId], references: [id])
+  formId String @db.ObjectId
+  label String
+  type String // e.g., text, checkbox, dropdown, etc.
+  options String[] // Array of options if applicable
+  responses ResponseField[]
+}
+
+model Response {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  form Form @relation(fields: [formId], references: [id])
+  formId String @db.ObjectId
+  user User @relation(fields: [userId], references: [id])
+  userId String @db.ObjectId
+  submissionDate DateTime
+  responseField ResponseField[]
+}
+
+model ResponseField {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  response Response @relation(fields: [responseId], references: [id])
+  responseId String @db.ObjectId
+  field FormField @relation(fields: [fieldId], references: [id])
+  fieldId String @db.ObjectId
+  value String // the actual value provided by the respondent
+}
+
